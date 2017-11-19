@@ -6,6 +6,10 @@ Simply type in a $SYMBOL like $AAPL or $GOOG and bam!
 
 ![Example](https://i.imgur.com/C2z8tZS.png)
 
+Supports Bitcoin and Ethereum as well
+
+![Crypto Example](https://i.imgur.com/AFZyhDl.png)
+
 ## How does it work?
 
 It's a node.js bot running on the Heroku platform.

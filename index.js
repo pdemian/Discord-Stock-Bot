@@ -42,6 +42,11 @@ const hardcoded_values = {
 	//cryptocurrencies
 	'BTC': 'BTCUSD=X',
 	'ETH': 'ETHUSD=X'
+	
+	//add your own values for commonly used stocks
+	//'CAD': 'CADUSD=X',
+	//'DANK': 'WEED.TO',
+	//'MONEYMACHINE': 'NVDA'
 };
 
 //to make numbers more easily digestible
@@ -53,10 +58,10 @@ function shortForm(num) {
 	
 	//is there a more programatic way of doing this?
 	//maybe with arrays, but I feel like this is just fine
-	if(log > 12) { return round(num / 1e12) + "T"; }
-	else if(log > 9) { return round(num / 1e9) + "B"; }
-	else if(log > 6) { return round(num / 1e6) + "M"; }
-	else if(log > 3) { return round(num / 1e3) + "K"; } 
+	if(log > 12) { return round(num / 1e12) + 'T'; }
+	else if(log > 9) { return round(num / 1e9) + 'B'; }
+	else if(log > 6) { return round(num / 1e6) + 'M'; }
+	else if(log > 3) { return round(num / 1e3) + 'K'; } 
 	return round(num);
 }
 
@@ -86,32 +91,32 @@ client.on('message', message => {
 			modules: [ 'price' ]
 		}, function (err, quotes) {
 			if(err) {
-				message.channel.send("Stock(s) not found or API error");
+				message.channel.send('Stock(s) not found or API error');
 			}
 			else {
 				for(var i = 0; i < symbols.length; i++) {
-					var data = quotes[symbols[i]]["price"];
+					var data = quotes[symbols[i]]['price'];
 					
 					//extract data
 					
-					var sign           = +data["regularMarketChange"] >= 0;
-					var signVal        = sign ? "+" : "";
+					var sign           = +data['regularMarketChange'] >= 0;
+					var signVal        = sign ? '+' : '';
 					var color          = sign ? green : red;
-					var currencySymbol = data["currency"] + data["currencySymbol"];
+					var currencySymbol = data['currency'] + data['currencySymbol'];
 					//currencies don't have long names, but long names are prefered for stocks
-					var name           = data["longName"] == null ? data["shortName"] : data["longName"];
-					var symbol         = data["symbol"];
-					var price          = round(data["regularMarketPrice"]);
-					var change         = round(data["regularMarketChange"]);
-					//Even though the data is called "changePercent" it isn't actually a percentage
-					var changePercent  = round(data["regularMarketChangePercent"] * 100);
-					var high           = round(data["regularMarketDayHigh"])
-					var low            = round(data["regularMarketDayLow"])
-					var prev           = round(data["regularMarketPreviousClose"])
+					var name           = data['longName'] == null ? data['shortName'] : data['longName'];
+					var symbol         = data['symbol'];
+					var price          = round(data['regularMarketPrice']);
+					var change         = round(data['regularMarketChange']);
+					//Even though the data is called 'changePercent' it isn't actually a percentage
+					var changePercent  = round(data['regularMarketChangePercent'] * 100);
+					var high           = round(data['regularMarketDayHigh'])
+					var low            = round(data['regularMarketDayLow'])
+					var prev           = round(data['regularMarketPreviousClose'])
 					//currencies don't have volume or market caps
-					var volume         = +data["regularMarketVolume"] < 1 ? "N/A" : shortForm(data["regularMarketVolume"]);
-					var cap            = !data["marketCap"] ? "N/A" : shortForm(data["marketCap"]);
-					var date           = new Date(data["regularMarketTime"]);
+					var volume         = !data['regularMarketVolume'] || +data['regularMarketVolume'] < 1 ? 'N/A' : shortForm(data['regularMarketVolume']);
+					var cap            = !data['marketCap'] ? 'N/A' : shortForm(data['marketCap']);
+					var date           = new Date(data['regularMarketTime']);
 					
 
 					//send message
@@ -119,17 +124,17 @@ client.on('message', message => {
 						embed: {
 							color: color,
 							author: { 
-								name: util.format("%s (%s)", name, symbol) 
+								name: util.format('%s (%s)', name, symbol) 
 							},
 							fields: [
 								{
-									name: util.format("%s%d %s%d (%s%d%%)", currencySymbol, price, signVal, change, signVal, changePercent),
-									value: util.format("High: %d, Low: %d, Prev: %d\nCap: %s, Volume: %s", high, low, prev, cap, volume)
+									name: util.format('%s%d %s%d (%s%d%%)', currencySymbol, price, signVal, change, signVal, changePercent),
+									value: util.format('High: %d, Low: %d, Prev: %d\nCap: %s, Volume: %s', high, low, prev, cap, volume)
 								}
 							],
 							timestamp: date,
 							footer: {
-								text: "Via Yahoo! Finance. Delayed 15 min"
+								text: 'Via Yahoo! Finance. Delayed 15 min'
 							}
 						}
 					});		
@@ -148,8 +153,9 @@ process.on('uncaughtException', function(err) {
 	console.error(err);
 });
 
-//comment out if you're not running on Heroku
-var herokuURL = "http://<your app name>.herokuapp.com";
+//comment out all this below if you're not running on Heroku
+//Heroku requires a server running in the background
+var herokuURL = 'http://<your app name>.herokuapp.com';
 
 var server = http.createServer(function(req, res) {
 	var body = '<!DOCTYPE html>' +
@@ -171,9 +177,10 @@ var server = http.createServer(function(req, res) {
 	return res.end();
 });
 server.listen(process.env.PORT || 8080, function() {
-	console.log("Server launched!");
-	console.log("Server running on port: ", server.address().port);
+	console.log('Server launched!');
+	console.log('Server running on port: ', server.address().port);
 	
+	//keep this server from sleeping
 	setInterval(function() {
 		http.get(herokuURL);
 	}, 300000); // every 5 minutes (300000)
