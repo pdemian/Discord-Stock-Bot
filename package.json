@@ -1,0 +1,16 @@
+{
+  "name": "discordstockbot",
+  "version": "1.0.0",
+  "description": "Discord Stock Bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Patrick Demian",
+  "license": "MIT",
+  "dependencies": {
+    "bufferutil": "^3.0.3",
+    "discord.js": "^11.2.1",
+    "yahoo-finance": "^0.3.5"
+  }
+}
