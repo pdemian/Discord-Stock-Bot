@@ -22,35 +22,71 @@ SOFTWARE.
 */
 
 //imports
-const Discord      = require('discord.js');
-const yahooFinance = require('yahoo-finance');
-const http         = require('http');
-const url          = require('url');
-const util         = require('util');
+const Discord      = require("discord.js");
+const yahooFinance = require("yahoo-finance");
+const http         = require("http");
+const url          = require("url");
+const util         = require("util");
 
 //discord stuff
 const client = new Discord.Client();
-const token  = '<DISCORD TOKEN HERE>';
+const token  = "<DISCORD TOKEN HERE>";
 
 //message stuff
-const regex = /\$([A-Za-z\.=\-]*[A-Za-z]+)/g;
+const regex = /\$([A-Za-z\.=\-\:]*[A-Za-z]+)/g;
 const red   = 0xFF0000;
 const green = 0x00FF00;
 
 //hard code some symbols
-const hardcoded_values = {
+const hardcoded_tickers = {
 	//cryptocurrencies
-	'BTC': 'BTCUSD=X',
-	'ETH': 'ETHUSD=X'
+	"BTC"  : "BTC-USD",
+	"ETH"  : "ETH-USD",
+	"BCH"  : "BCH-USD",
+	"XRP"  : "XRP-USD",
+	"LTC"  : "LTC-USD",
+	"DOGE" : "DOGE-USD"
 	
 	//add your own values for commonly used stocks
-	//'CAD': 'CADUSD=X',
-	//'DANK': 'WEED.TO',
-	//'MONEYMACHINE': 'NVDA'
+	//"CAD": "CADUSD=X",
+	//"DANK": "WEED.TO",
+	//"MONEYMACHINE": "NVDA",
+};
+
+var hardcoded_markets = {
+	//North America (Apparently none for NYSE and NASDAQ)
+	"TSX" : ".TO", "TSE"  : ".TO",
+	"CVE" : ".V",
+	//Asia Pacific
+	"AU"  : ".AX", "ASX"  : ".AX",
+	"HK"  : ".HK", "HKG"  : ".HK",
+	"NZ"  : ".NZ", "NZE"  : ".NZE",
+	//Europe
+	"VI"  : ".VI", "WBAG" : ".VI",
+	"BT"  : ".BR", "EBR"  : ".BR",
+	"FR"  : ".PA", "EPA"  : ".PA",
+	"BE"  : ".BE", "BER"  : ".BE",
+	"ETR" : ".DE",
+	"FF"  : ".F",  "FRA"  : ".F",
+	"ST"  : ".SG", "STU"  : ".SG", 
+	"DB"  : ".IR", "ISE"  : ".IR",
+	"MI"  : ".MI", "BIT"  : ".MI",
+	"AE"  : ".AS", "AMS"  : ".AS",
+	"OS"  : ".OL", "OSL"  : ".OL",
+	"LB"  : ".LS", "ELI"  : ".LS",
+	"MD"  : ".MA", "MCE"  : ".MA",
+	"EB"  : ".VX", "VTX"  : ".VX",
+	"LN"  : ".L",  "LON"  : ".L",
+	//Middle East
+	"TV"  : ".TA", "TLV"  : ".TA"
 };
 
 //to make numbers more easily digestible
 function round(num) {
+	if(Math.abs(num) < 0.01) {
+		//0.00238 returns 2.38e-3 which is much nicer than "0.00"
+		return num.toExponential(2);
+	}
 	return num.toFixed(2);
 }
 function shortForm(num) {
@@ -58,10 +94,10 @@ function shortForm(num) {
 	
 	//is there a more programatic way of doing this?
 	//maybe with arrays, but I feel like this is just fine
-	if(log > 12) { return round(num / 1e12) + 'T'; }
-	else if(log > 9) { return round(num / 1e9) + 'B'; }
-	else if(log > 6) { return round(num / 1e6) + 'M'; }
-	else if(log > 3) { return round(num / 1e3) + 'K'; } 
+	if(log > 12) { return round(num / 1e12) + "T"; }
+	else if(log > 9) { return round(num / 1e9) + "B"; }
+	else if(log > 6) { return round(num / 1e6) + "M"; }
+	else if(log > 3) { return round(num / 1e3) + "K"; } 
 	return round(num);
 }
 
@@ -76,9 +112,19 @@ client.on('message', message => {
 	while(match != null) {
 		var ticker = match[1].toUpperCase();
 				
-		if(hardcoded_values[ticker] !== undefined) {
-			ticker = hardcoded_values[ticker];
-		}
+		if(hardcoded_tickers[ticker] !== undefined) {
+			ticker = hardcoded_tickers[ticker];
+		} else {
+			
+			//replace MARKET:STOCK with STOCK.MKT
+			var indx = ticker.indexOf(":");
+			if(indx > 0 && ticker.length > indx) {
+				var market = ticker.substring(0, indx);
+				if(hardcoded_markets[market] !== undefined) {
+					ticker = ticker.substring(indx+1, ticker.length) + hardcoded_markets[market];
+				}
+			}
+		}	
 		
 		symbols.push(ticker);
 		match = regex.exec(message.content);
@@ -91,32 +137,37 @@ client.on('message', message => {
 			modules: [ 'price' ]
 		}, function (err, quotes) {
 			if(err) {
-				message.channel.send('Stock(s) not found or API error');
+				message.channel.send("Stock(s) not found or API error");
 			}
 			else {
 				for(var i = 0; i < symbols.length; i++) {
-					var data = quotes[symbols[i]]['price'];
+					var data = quotes[symbols[i]]["price"];
+					
+					//some tickers don't have a price for some reason
+					if(data["regularMarketPrice"] == undefined) {
+						message.channel.send("Price for " + symbols[i] + " could not be found");
+						continue;
+					}
 					
 					//extract data
-					
-					var sign           = +data['regularMarketChange'] >= 0;
-					var signVal        = sign ? '+' : '';
+					var sign           = +data["regularMarketChange"] >= 0;
+					var signVal        = sign ? "+" : "";
 					var color          = sign ? green : red;
-					var currencySymbol = data['currency'] + data['currencySymbol'];
+					var currencySymbol = data["currency"] + data["currencySymbol"];
 					//currencies don't have long names, but long names are prefered for stocks
-					var name           = data['longName'] == null ? data['shortName'] : data['longName'];
-					var symbol         = data['symbol'];
-					var price          = round(data['regularMarketPrice']);
-					var change         = round(data['regularMarketChange']);
-					//Even though the data is called 'changePercent' it isn't actually a percentage
-					var changePercent  = round(data['regularMarketChangePercent'] * 100);
-					var high           = round(data['regularMarketDayHigh'])
-					var low            = round(data['regularMarketDayLow'])
-					var prev           = round(data['regularMarketPreviousClose'])
+					var name           = data["longName"] == null ? data["shortName"] : data["longName"];
+					var symbol         = data["symbol"];
+					var price          = round(data["regularMarketPrice"]);
+					var change         = round(data["regularMarketChange"]);
+					//Even though the data is called "changePercent" it isn't actually a percentage
+					var changePercent  = round(data["regularMarketChangePercent"] * 100);
+					var high           = round(data["regularMarketDayHigh"])
+					var low            = round(data["regularMarketDayLow"])
+					var prev           = round(data["regularMarketPreviousClose"])
 					//currencies don't have volume or market caps
-					var volume         = !data['regularMarketVolume'] || +data['regularMarketVolume'] < 1 ? 'N/A' : shortForm(data['regularMarketVolume']);
-					var cap            = !data['marketCap'] ? 'N/A' : shortForm(data['marketCap']);
-					var date           = new Date(data['regularMarketTime']);
+					var volume         = !data["regularMarketVolume"] || +data["regularMarketVolume"] < 1 ? "N/A" : shortForm(data["regularMarketVolume"]);
+					var cap            = !data["marketCap"] ? "N/A" : shortForm(data["marketCap"]);
+					var date           = new Date(data["regularMarketTime"]);
 					
 
 					//send message
@@ -124,17 +175,17 @@ client.on('message', message => {
 						embed: {
 							color: color,
 							author: { 
-								name: util.format('%s (%s)', name, symbol) 
+								name: util.format("%s (%s)", name, symbol) 
 							},
 							fields: [
 								{
-									name: util.format('%s%d %s%d (%s%d%%)', currencySymbol, price, signVal, change, signVal, changePercent),
-									value: util.format('High: %d, Low: %d, Prev: %d\nCap: %s, Volume: %s', high, low, prev, cap, volume)
+									name: util.format("%s%s %s%s (%s%s%%)", currencySymbol, price, signVal, change, signVal, changePercent),
+									value: util.format("High: %s, Low: %s, Prev: %s\nCap: %s, Volume: %s", high, low, prev, cap, volume)
 								}
 							],
 							timestamp: date,
 							footer: {
-								text: 'Via Yahoo! Finance. Delayed 15 min'
+								text: "Via Yahoo! Finance. Delayed 15 min"
 							}
 						}
 					});		
@@ -177,8 +228,8 @@ var server = http.createServer(function(req, res) {
 	return res.end();
 });
 server.listen(process.env.PORT || 8080, function() {
-	console.log('Server launched!');
-	console.log('Server running on port: ', server.address().port);
+	console.log("Server launched!");
+	console.log("Server running on port: ", server.address().port);
 	
 	//keep this server from sleeping
 	setInterval(function() {
