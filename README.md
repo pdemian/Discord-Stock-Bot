@@ -6,7 +6,11 @@ Simply type in a $SYMBOL like $AAPL or $GOOG and bam!
 
 ![Example](https://i.imgur.com/C2z8tZS.png)
 
-Supports Bitcoin and Ethereum as well
+International? Most markets supported
+
+![Toronto Stock Exchange Example](https://i.imgur.com/8CzOZqB.png)
+
+Supports Bitcoin, Ethereum, Bitcoin Cash, Ripple, Litecoin, and Dogecoin as well
 
 ![Crypto Example](https://i.imgur.com/AFZyhDl.png)
 
