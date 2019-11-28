@@ -20,6 +20,12 @@ It's a node.js bot running on the Heroku platform.
 
 It scans all messages for $SYMBOLs and retrieves a ticker from Yahoo! finance, then posts a message to the channel.
 
+## How can I run this?
+
+ - Setup the DISCORD_TOKEN environment variable with your platform
+ - `npm run build`
+ - `npm run start`
+
 ## What if I don't want to run a whole node process to get this bot running? 
 Click this [this link](https://discordapp.com/oauth2/authorize?&client_id=380167669120237569&scope=bot&permissions=0) to add the bot to your discord*  
 *No guarantee of uptime
@@ -31,4 +37,3 @@ Feel free to open a ticket regarding any issues you come across, or submit a pul
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
-
