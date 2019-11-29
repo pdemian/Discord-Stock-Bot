@@ -23,6 +23,7 @@ It scans all messages for $SYMBOLs and retrieves a ticker from Yahoo! finance, t
 ## How can I run this?
 
  - Setup the DISCORD_TOKEN environment variable with your platform
+ - `npm install`
  - `npm run build`
  - `npm run start`
 

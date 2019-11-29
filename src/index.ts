@@ -26,12 +26,15 @@ import Discord from 'discord.js';
 import yahooFinance from 'yahoo-finance';
 import util from 'util';
 
+// Discord client token. Either replace with constant string or add to environment
+const token = process.env['DISCORD_TOKEN'];
+
 // Message regex
 const regex = /\$([A-Za-z\.=\-\:\^]*[A-Za-z]+)/g;
 
 // Specially handled tickers 
 const special_tickers = {
-    // Cryptocurrencies
+	// Cryptocurrencies
 	'BTC'  : 'BTC-USD',
 	'ETH'  : 'ETH-USD',
 	'XRP'  : 'XRP-USD',
@@ -168,12 +171,12 @@ class QuoteMessage {
 }
 
 function unhandledException(err: Error): void {
-    console.error('Uncaught Exception: ');
-    console.error(err);
+	console.error('Uncaught Exception: ');
+	console.error(err);
 }
 
 function onReady(): void {
-    console.log('I am ready!');
+	console.log('I am ready!');
 }
 
 // Loop through all parsed tickers and extract them. Empty array if none
@@ -237,7 +240,6 @@ function main(): void {
 
 	// Initialize discord 
 	const client = new Discord.Client();
-	const token  = process.env["DISCORD_TOKEN"];
 	client.on('ready', onReady);
 	client.on('message', onMessage);
 	client.login(token);
