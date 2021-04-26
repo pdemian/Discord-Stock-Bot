@@ -8,10 +8,8 @@
     "start": "node ./dist/index.js"
   },
   "author": "Patrick Demian",
-  "contributors":{
-    "Griffin McShane",
-    "Alex Medick",
-  },
+  "contributors": "Griffin McShane and Alex Medick",
+
   "license": "MIT",
   "dependencies": {
     "@types/node": "^12.12.14",
