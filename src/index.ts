@@ -301,7 +301,6 @@ const special_tickers = {
  'GLEEC' : 'GLEEC-USD',
  'INT' : 'INT-USD',
  'PHR' : 'PHR-USD',
- 'MIR' : 'MIR-USD',
  'AYA' : 'AYA-USD',
  'IDNA' : 'IDNA-USD',
  'BCA' : 'BCA-USD',
