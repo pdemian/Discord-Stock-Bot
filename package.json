@@ -1,13 +1,17 @@
 {
-  "name": "memebot",
+  "name": "discordpricebot",
   "version": "1.1.0",
-  "description": "Meme bot",
+  "description": "It gets stonk and crypto prices from yahoo! finance.",
   "main": "./dist/index.js",
   "scripts": {
     "build": "tsc",
     "start": "node ./dist/index.js"
   },
   "author": "Patrick Demian",
+  "contributors":{
+    "Griffin McShane",
+    "Alex Medick",
+  },
   "license": "MIT",
   "dependencies": {
     "@types/node": "^12.12.14",
