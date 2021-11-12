@@ -1,7 +1,7 @@
 {
-  "name": "memebot",
-  "version": "1.1.0",
-  "description": "Meme bot",
+  "name": "Stockbot",
+  "version": "1.1.1",
+  "description": "Stock bot",
   "main": "./dist/index.js",
   "scripts": {
     "build": "tsc",

@@ -30,7 +30,7 @@ import util from 'util';
 const token = process.env['DISCORD_TOKEN'];
 
 // Message regex
-const regex = /\$([A-Za-z\.=\-\:\^]*[A-Za-z]+)/g;
+const regex = /\$((?:[A-Za-z]{2,3}:[0-9]+)|(?:[A-Za-z0-9=\.\-\^]+)|(?:[0-9]+\.[A-Za-z]{2,3}))/g;
 
 // Specially handled tickers 
 const special_tickers = {
@@ -185,6 +185,8 @@ function parseTickers(message: string): string[] {
 
 	for(let match = regex.exec(message); match !== null; match = regex.exec(message)) {
 		const ticker = match[1].toUpperCase();
+		
+		if(!/[A-Za-z]/.test(ticker)) continue;
 
 		if(special_tickers[ticker] !== undefined) {
 			symbols.push(special_tickers[ticker]);
