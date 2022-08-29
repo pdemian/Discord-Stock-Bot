@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2019 Patrick Demian
+Copyright (c) 2022 Patrick Demian
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,9 +22,11 @@ SOFTWARE.
 */
 
 // Imports
-import Discord from 'discord.js';
+import Discord, { GatewayIntentBits } from 'discord.js';
 import yahooFinance from 'yahoo-finance';
 import util from 'util';
+import * as dotenv from "dotenv";
+dotenv.config({ path: __dirname+'/../.env' });
 
 // Discord client token. Either replace with constant string or add to environment
 const token = process.env['DISCORD_TOKEN'];
@@ -40,10 +42,17 @@ const special_tickers = {
 	'XRP'  : 'XRP-USD',
 	'LTC'  : 'LTC-USD',
 	'DOGE' : 'DOGE-USD',
+	'BNB'  : 'BNB-USD',
+	'ADA'  : 'ADA-USD',
+	'SOL'  : 'SOL-USD',
+	'XMR'  : 'XMR-USD',
 	
-	// Canadian currencies
+	// Other currencies
 	'CAD'  : 'CADUSD=X',
-	'USD'  : 'CAD=X'
+	'USD'  : 'CAD=X',
+	'EUR'  : 'EUR=X',
+	'GBP'  : 'GBP=X',
+	'JPY'  : 'JPY=X'
 };
 
 // Global supported market list
@@ -155,18 +164,18 @@ class QuoteMessage {
 		return this.round(num);
 	}
 
-	public toEmbed() : Discord.RichEmbed {
+	public toEmbed() {
 		const description = 
 			util.format('%s%s %s%s (%s%s%%)\n', this.currency_symbol, this.price, this.sign_symbol, this.change, this.sign_symbol, this.change_percent) + 
 			util.format('High: %s, Low: %s, Prev: %s\n', this.high, this.low, this.prev) +
 			util.format('Cap: %s, Volume: %s', this.market_cap, this.volume);
 
-		return new Discord.RichEmbed()
+		return { embeds: [new Discord.EmbedBuilder()
 			.setColor(this.sign ? this.green : this.red)
-			.setAuthor(util.format('%s (%s)', this.name, this.symbol))
+			.setAuthor({ name: util.format('%s (%s)', this.name, this.symbol) })
 			.setTimestamp(this.date)
-			.setFooter('Via Yahoo! Finance. Delayed 15 min')
-			.setDescription(description);
+			.setFooter({ text: 'Via Yahoo! Finance. Delayed 15 min' })
+			.setDescription(description) ]};
 	}
 }
 
@@ -186,7 +195,14 @@ function parseTickers(message: string): string[] {
 	for(let match = regex.exec(message); match !== null; match = regex.exec(message)) {
 		const ticker = match[1].toUpperCase();
 		
-		if(!/[A-Za-z]/.test(ticker)) continue;
+		if(/^[0-9]/.test(ticker)) {
+			if(!/\.[A-Za-z]{2,}/.test(ticker)) {
+				continue;
+			}
+		}
+		else if(!/[A-Za-z]/.test(ticker)) {
+			continue;
+		}
 
 		if(special_tickers[ticker] !== undefined) {
 			symbols.push(special_tickers[ticker]);
@@ -241,9 +257,9 @@ function main(): void {
 	process.on('uncaughtException', unhandledException);
 
 	// Initialize discord 
-	const client = new Discord.Client();
+	const client = new Discord.Client({intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent ]});
 	client.on('ready', onReady);
-	client.on('message', onMessage);
+	client.on('messageCreate', onMessage);
 	client.login(token);
 }
 

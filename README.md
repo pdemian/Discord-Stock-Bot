@@ -16,7 +16,7 @@ Supports Bitcoin, Ethereum, Bitcoin Cash, Ripple, Litecoin, and Dogecoin as well
 
 ## How does it work?
 
-It's a node.js bot running on the Heroku platform.
+It's a node.js bot able to run on any service (currently AWS).
 
 It scans all messages for $SYMBOLs and retrieves a ticker from Yahoo! finance, then posts a message to the channel.
 

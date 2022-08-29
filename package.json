@@ -1,7 +1,7 @@
 {
-  "name": "Stockbot",
-  "version": "1.1.1",
-  "description": "Stock bot",
+  "name": "Discord-Stock-Bot",
+  "version": "2.0.0",
+  "description": "Discord Stock bot",
   "main": "./dist/index.js",
   "scripts": {
     "build": "tsc",
@@ -9,11 +9,16 @@
   },
   "author": "Patrick Demian",
   "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^18.7.13",
+    "typescript": "~4.7.4"
+  },
   "dependencies": {
     "@types/node": "^12.12.14",
-    "bufferutil": "^4.0.1",
-    "discord.js": "^11.5.1",
-    "typescript": "^3.7.2",
-    "yahoo-finance": "^0.3.6"
+    "bufferutil": "^4.0.6",
+    "discord.js": "^14.3.0",
+    "dotenv": "^16.0.1",
+    "erlpack": "github:discord/erlpack",
+    "yahoo-finance": "^0.3.7"
   }
 }
