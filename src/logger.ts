@@ -31,7 +31,7 @@ export class Logger {
 
   private log(type: string, message: string) {
     const todays_date = new Date();
-    const todays_file = path.join(this.log_path, this.log_file.replace("{date}", `${todays_date.getUTCFullYear()}-${todays_date.getUTCMonth()}-${todays_date.getUTCDay()}`));
+    const todays_file = path.join(this.log_path, this.log_file.replace("{date}", `${todays_date.getUTCFullYear()}-${todays_date.getUTCMonth()+1}-${todays_date.getUTCDate()}`));
 
     fs.appendFileSync(todays_file, `[${todays_date.toISOString()}] ${type}: ${message}\n`);
   }

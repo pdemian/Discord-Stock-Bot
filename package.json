@@ -18,6 +18,7 @@
     "currency-symbol-map": "^5.1.0",
     "discord.js": "^14.3.0",
     "dotenv": "^16.0.1",
+    "utf-8-validate": "^5.0.9",
     "yahoo-finance2": "^2.3.6"
   }
 }

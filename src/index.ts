@@ -110,9 +110,6 @@ class QuoteMessage {
   public readonly prev: string;
   public readonly volume: string;
   public readonly market_cap: string;
-  public readonly pe: string;
-  public readonly eps: string;
-  public readonly div_yield: string;
   public readonly market_state: "REGULAR" | "CLOSED" | "PRE" | "PREPRE" | "POST" | "POSTPOST";
   public readonly prepost_price: string = "";
   public readonly prepost_change: string = "";
@@ -133,9 +130,6 @@ class QuoteMessage {
     this.low            = this.round(data.regularMarketDayLow);
     this.prev           = this.round(data.regularMarketPreviousClose);
     this.market_state   = data.marketState;
-    this.pe             = this.round(data.forwardPE);
-    this.eps            = this.round(data.epsForward);
-    this.div_yield      = data.trailingAnnualDividendYield ? this.round(data.trailingAnnualDividendYield * 100) : 'N/A';
 
     // Currencies don't have volumes or market caps
     this.market_cap = data.marketCap == undefined ? 'N/A' : this.shortForm(data.marketCap);
@@ -196,14 +190,13 @@ class QuoteMessage {
 
   public toEmbed() {
     const prepost_market = 
-      this.market_status ? util.format('%s: %s %s%s (%s%s%%)\n', this.market_status, this.prepost_price, this.prepost_sign, this.prepost_change, this.prepost_sign, this.prepost_change_percent) : "";
+      this.market_status ? util.format('%s: **%s** %s%s (%s%s%%)\n', this.market_status, this.prepost_price, this.prepost_sign, this.prepost_change, this.prepost_sign, this.prepost_change_percent) : "";
 
     const description = 
-      util.format('%s%s %s%s (%s%s%%)\n', this.currency_symbol, this.price, this.sign_symbol, this.change, this.sign_symbol, this.change_percent) + 
+      util.format('__%s**%s** %s%s (%s%s%%)__\n', this.currency_symbol, this.price, this.sign_symbol, this.change, this.sign_symbol, this.change_percent) + 
       prepost_market +
-      util.format('High: %s, Low: %s, Prev: %s\n', this.high, this.low, this.prev) +
-      util.format('P/E Ratio: %s, EPS: %s, Div Yield: %s%%\n', this.pe, this.eps, this.div_yield) +
-      util.format('Cap: %s, Volume: %s', this.market_cap, this.volume);
+      util.format('High: **%s**, Low: **%s**, Prev: **%s**\n', this.high, this.low, this.prev) +
+      util.format('Cap: **%s**, Volume: **%s**', this.market_cap, this.volume);
 
     return { embeds: [new Discord.EmbedBuilder()
       .setColor(this.sign ? this.green : this.red)
