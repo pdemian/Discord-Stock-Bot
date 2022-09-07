@@ -1,6 +1,6 @@
 {
   "name": "Discord-Stock-Bot",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Discord Stock bot",
   "main": "./dist/index.js",
   "scripts": {
@@ -14,11 +14,10 @@
     "typescript": "~4.7.4"
   },
   "dependencies": {
-    "@types/node": "^12.12.14",
     "bufferutil": "^4.0.6",
+    "currency-symbol-map": "^5.1.0",
     "discord.js": "^14.3.0",
     "dotenv": "^16.0.1",
-    "erlpack": "github:discord/erlpack",
-    "yahoo-finance": "^0.3.7"
+    "yahoo-finance2": "^2.3.6"
   }
 }
