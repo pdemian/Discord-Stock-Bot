@@ -22,20 +22,20 @@ SOFTWARE.
 */
 
 // Imports
-import Discord, { GatewayIntentBits } from 'discord.js';
-import yahooFinance from 'yahoo-finance2';
-import util from 'util';
-import * as dotenv from 'dotenv';
-import { Logger } from './logger';
-import { QuoteResponseArray, Quote } from 'yahoo-finance2/dist/esm/src/modules/quote';
-import getSymbolFromCurrency from 'currency-symbol-map'
-dotenv.config({ path: __dirname+'/../.env' });
+import Discord, { GatewayIntentBits } from "discord.js";
+import yahooFinance from "yahoo-finance2";
+import util from "util";
+import * as dotenv from "dotenv";
+import { Logger } from "./logger";
+import { QuoteResponseArray, Quote } from "yahoo-finance2/dist/esm/src/modules/quote";
+import getSymbolFromCurrency from "currency-symbol-map"
+dotenv.config({ path: __dirname+"/../.env" });
 
 // Discord client token. Either replace with constant string or add to environment
-const token = process.env['DISCORD_TOKEN'];
-const log_path = process.env['LOG_FILE_PATH'] || '/tmp/discord-stock-bot/';
-const log_file = process.env['LOG_FILE'] || 'applog-{date}.log';
-const log_retention_days = Number.parseInt(process.env['LOG_RETENTION_DAYS'] || "7");
+const token = process.env["DISCORD_TOKEN"];
+const log_path = process.env["LOG_FILE_PATH"] || "/tmp/discord-stock-bot/";
+const log_file = process.env["LOG_FILE"] || "applog-{date}.log";
+const log_retention_days = Number.parseInt(process.env["LOG_RETENTION_DAYS"] || "7");
 
 const log = new Logger(log_path, log_file, log_retention_days);
 
@@ -45,22 +45,22 @@ const regex = /\$((?:[A-Za-z]{2,3}:[0-9]+)|(?:[A-Za-z0-9=\.\-\^]+)|(?:[0-9]+\.[A
 // Specially handled tickers 
 const special_tickers = {
   // Cryptocurrencies
-  'BTC'  : 'BTC-USD',
-  'ETH'  : 'ETH-USD',
-  'XRP'  : 'XRP-USD',
-  'LTC'  : 'LTC-USD',
-  'DOGE' : 'DOGE-USD',
-  'BNB'  : 'BNB-USD',
-  'ADA'  : 'ADA-USD',
-  'SOL'  : 'SOL-USD',
-  'XMR'  : 'XMR-USD',
+  "BTC"  : "BTC-USD",
+  "ETH"  : "ETH-USD",
+  "XRP"  : "XRP-USD",
+  "LTC"  : "LTC-USD",
+  "DOGE" : "DOGE-USD",
+  "BNB"  : "BNB-USD",
+  "ADA"  : "ADA-USD",
+  "SOL"  : "SOL-USD",
+  "XMR"  : "XMR-USD",
   
   // Other currencies
-  'CAD'  : 'CADUSD=X',
-  'USD'  : 'CAD=X',
-  'EUR'  : 'EUR=X',
-  'GBP'  : 'GBP=X',
-  'JPY'  : 'JPY=X'
+  "CAD"  : "CADUSD=X",
+  "USD"  : "CAD=X",
+  "EUR"  : "EUR=X",
+  "GBP"  : "GBP=X",
+  "JPY"  : "JPY=X"
 };
 
 // Global supported market list
@@ -95,7 +95,9 @@ const markets = {
 class QuoteMessage {
   private readonly red   = 0xFF0000;
   private readonly green = 0x00FF00;
+  private readonly grey  = 0x808080;
 
+  public readonly color: number;
   public readonly sign: boolean;
   public readonly sign_symbol: string;
   public readonly currency_symbol: string;
@@ -119,8 +121,9 @@ class QuoteMessage {
 
   constructor(data: Quote) {
     // Extract and format the data
+    this.color          = data.regularMarketChange! > 0 ? this.green : (data.regularMarketChange! < 0 ? this.red : this.grey);
     this.sign           = data.regularMarketChange! >= 0;
-    this.sign_symbol    = this.sign ? '+' : '';
+    this.sign_symbol    = this.sign ? "+" : "";
     this.symbol         = data.symbol;
     this.date           = data.regularMarketTime!;
     this.price          = this.round(data.regularMarketPrice);
@@ -132,8 +135,8 @@ class QuoteMessage {
     this.market_state   = data.marketState;
 
     // Currencies don't have volumes or market caps
-    this.market_cap = data.marketCap == undefined ? 'N/A' : this.shortForm(data.marketCap);
-    this.volume = data.regularMarketVolume == undefined || data.regularMarketVolume < 1 ? 'N/A' : this.shortForm(data.regularMarketVolume);
+    this.market_cap = data.marketCap == undefined ? "N/A" : this.shortForm(data.marketCap);
+    this.volume = data.regularMarketVolume == undefined || data.regularMarketVolume < 1 ? "N/A" : this.shortForm(data.regularMarketVolume);
 
     this.currency_symbol = data.currency ? data.currency +  getSymbolFromCurrency(data.currency) : "";
     
@@ -150,14 +153,14 @@ class QuoteMessage {
           this.prepost_price = this.round(data.preMarketPrice);
           this.prepost_change = this.round(data.preMarketChange);
           this.prepost_change_percent = this.round(data.preMarketChangePercent);
-          this.prepost_sign = data.preMarketChange! >= 0 ? '+' : '';
+          this.prepost_sign = data.preMarketChange! >= 0 ? "+" : "";
           break;
         default:
           this.market_status = "PostMkt";
           this.prepost_price = this.round(data.postMarketPrice);
           this.prepost_change = this.round(data.postMarketChange);
           this.prepost_change_percent = this.round(data.postMarketChangePercent);
-          this.prepost_sign = data.postMarketChange! >= 0 ? '+' : '';
+          this.prepost_sign = data.postMarketChange! >= 0 ? "+" : "";
           break;
       }
     }
@@ -169,7 +172,7 @@ class QuoteMessage {
   // Rounds digits to 2 decimal places, using scientific notation if the number is too small 
   private round(num: number | undefined): string {
     if(num === undefined) {
-      return 'N/A';
+      return "N/A";
     }
     if(Math.abs(num) < 0.01) {
       return num.toExponential(2);
@@ -181,39 +184,39 @@ class QuoteMessage {
   private shortForm(num: number): string {
     const log = Math.log10(num);
   
-    if(log > 12) { return this.round(num / 1e12) + 'T'; }
-    else if(log > 9) { return this.round(num / 1e9) + 'B'; }
-    else if(log > 6) { return this.round(num / 1e6) + 'M'; }
-    else if(log > 3) { return this.round(num / 1e3) + 'K'; } 
+    if(log > 12) { return this.round(num / 1e12) + "T"; }
+    else if(log > 9) { return this.round(num / 1e9) + "B"; }
+    else if(log > 6) { return this.round(num / 1e6) + "M"; }
+    else if(log > 3) { return this.round(num / 1e3) + "K"; } 
     return this.round(num);
   }
 
   public toEmbed() {
     const prepost_market = 
-      this.market_status ? util.format('%s: **%s** %s%s (%s%s%%)\n', this.market_status, this.prepost_price, this.prepost_sign, this.prepost_change, this.prepost_sign, this.prepost_change_percent) : "";
+      this.market_status ? util.format("%s: **%s** %s%s (%s%s%%)\n", this.market_status, this.prepost_price, this.prepost_sign, this.prepost_change, this.prepost_sign, this.prepost_change_percent) : "";
 
     const description = 
-      util.format('__%s**%s** %s%s (%s%s%%)__\n', this.currency_symbol, this.price, this.sign_symbol, this.change, this.sign_symbol, this.change_percent) + 
+      util.format("%s**%s** %s%s (%s%s%%)\n", this.currency_symbol, this.price, this.sign_symbol, this.change, this.sign_symbol, this.change_percent) +
       prepost_market +
-      util.format('High: **%s**, Low: **%s**, Prev: **%s**\n', this.high, this.low, this.prev) +
-      util.format('Cap: **%s**, Volume: **%s**', this.market_cap, this.volume);
+      util.format("High: **%s**, Low: **%s**, Prev: **%s**\n", this.high, this.low, this.prev) +
+      util.format("Cap: **%s**, Volume: **%s**", this.market_cap, this.volume);
 
     return { embeds: [new Discord.EmbedBuilder()
-      .setColor(this.sign ? this.green : this.red)
-      .setAuthor({ name: util.format('%s (%s)', this.name, this.symbol) })
+      .setColor(this.color)
+      .setAuthor({ name: util.format("%s (%s)", this.name, this.symbol) })
       .setTimestamp(this.date)
-      .setFooter({ text: 'Via Yahoo! Finance. Delayed 15 min' })
+      .setFooter({ text: "Via Yahoo! Finance. Delayed 15 min" })
       .setDescription(description) ]};
   }
 }
 
 function unhandledException(err: Error): void {
-  log.error('Uncaught Exception: ');
+  log.error("Uncaught Exception: ");
   log.exception(err);
 }
 
 function onReady(): void {
-  log.info('I am ready!');
+  log.info("I am ready!");
 }
 
 // Loop through all parsed tickers and extract them. Empty array if none
@@ -238,11 +241,11 @@ function parseTickers(message: string): string[] {
       symbols.push(special_tickers[ticker]);
     }
     else {
-      const index = ticker.indexOf(':');
+      const index = ticker.indexOf(":");
       // If we have MARKET:TICKER, replace with TICKER.MKT
       if(index > 0 && ticker.length > index) {
         const market = ticker.substring(0, index);
-        const mkt = markets[market] === undefined ? '' : markets[market];
+        const mkt = markets[market] === undefined ? "" : markets[market];
         const newSymbol = ticker.substring(index+1, ticker.length) + mkt;
         symbols.push(newSymbol);
         log.info(`Modified to become ${newSymbol}`);
@@ -259,9 +262,10 @@ function parseTickers(message: string): string[] {
 function onMessage(message: Discord.Message): void {
   const symbols = parseTickers(message.content);
   if(symbols.length == 0) return;
+  log.info("Start onMessage");
   log.info("Expected symbols: " + JSON.stringify(symbols));
 
-  yahooFinance.quote(symbols).then(async (quotes: QuoteResponseArray) => {
+  yahooFinance.quote(symbols).then((quotes: QuoteResponseArray) => {
     log.info("Got symbol info from Yahoo");
     for(const data of quotes) {
       const symbol = data.symbol;
@@ -272,30 +276,33 @@ function onMessage(message: Discord.Message): void {
         continue;
       }
 
-      try {
-        await message.channel.send(new QuoteMessage(data).toEmbed());
-      }
-      catch(error) {
-        message.channel.send(`There was an issue retrieving ${symbol}`);
-        log.error(`There was an issue retrieving ${symbol}`);
-        log.ex(error);
-      }
+      log.info("Start QuoteMessage");
+      const embed = new QuoteMessage(data).toEmbed();
+      log.info("Done QuoteMessage");
+
+      log.info(`Start sending message for ${symbol}`);
+      message.channel.send(embed).then(() => {
+        log.info(`Done sending message for ${symbol}`);
+      }).catch((error) => {
+        log.error(`There was an issue sending ${symbol} to the channel`);
+        log.exception(error);
+      });
     }
   }).catch((err) => {
-    message.channel.send('Stock(s) not found or API error');
+    message.channel.send("Stock(s) not found or API error");
     log.error("Failed to query stocks");
-    log.ex(err);
+    log.exception(err);
   });
 }
 
 function main(): void {
   // Handle unhandled exceptions
-  process.on('uncaughtException', unhandledException);
+  process.on("uncaughtException", unhandledException);
 
   // Initialize discord 
   const client = new Discord.Client({intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent ]});
-  client.on('ready', onReady);
-  client.on('messageCreate', onMessage);
+  client.on("ready", onReady);
+  client.on("messageCreate", onMessage);
   client.login(token);
 }
 

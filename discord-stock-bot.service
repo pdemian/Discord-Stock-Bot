@@ -1,0 +1,26 @@
+# Systemd service for the stock bot
+# Install @ /etc/systemd/system/
+# Adjust working directory (default /opt/Discord-Stock-Bot)
+# Then run `systemctl enable discord-stock-bot.service`
+# Ensure it's running with `systemctl status discord-stock-bot.service`
+# Attribution: https://stackoverflow.com/a/45780822
+
+[Unit]
+Description=Discord Stock Bot
+
+[Service]
+WorkingDirectory=/opt/Discord-Stock-Bot
+ExecStart=/usr/local/bin/npm run start
+Restart=always
+# Restart service after 10 seconds if node service crashes
+RestartSec=10
+# Output to syslog
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=nodejs-example
+#User=<alternate user>
+#Group=<alternate group>
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target

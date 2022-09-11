@@ -21,12 +21,12 @@ SOFTWARE.
 
 */
 
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from "fs";
+import * as path from "path";
 
 export class Logger {
   constructor(private log_path: string, private log_file: string, private retention_days: number) {  
-    setInterval(this.cleanOldLogFiles, 24 * 60 * 60 * 1000);
+    setInterval(this.cleanOldLogFiles.bind(this), 24 * 60 * 60 * 1000);
   }
 
   private log(type: string, message: string) {
@@ -44,29 +44,30 @@ export class Logger {
         const file_date = Date.parse(match[1]);
         const days_diff = Math.abs(file_date - todays_date.getTime()) / (1000 * 60 * 60 * 24);
         if(days_diff > this.retention_days) {
-          fs.unlinkSync((filename));
+          fs.unlinkSync(filename);
         }
       }
     }
   }
 
   public info(message: string) {
-    this.log('INFO', message);
+    this.log("INFO", message);
   }
 
   public warn(message: string) {
-    this.log('WARN', message);
+    this.log("WARN", message);
   }
 
   public error(message: string) {
-    this.log('ERROR', message);
+    this.log("ERROR", message);
   }
 
-  public exception(error: Error) {
-    this.log('EXCEPTION', `${error.name} ${error.message}:\n ${error.stack}`);
-  }
-
-  public ex(error: any) {
-    this.log('EXCEPTION', `${JSON.stringify(error)}`);
+  public exception(error: any) {
+    if(error instanceof Error || ("name" in error && "message" in error && "stack" in error)) {
+      this.log("EXCEPTION", `${error.name} ${error.message}:\n ${error.stack}`);
+    }
+    else {
+      this.log("EXCEPTION", `${JSON.stringify(error)}`);
+    }
   }
 }

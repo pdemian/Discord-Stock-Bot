@@ -16,13 +16,14 @@ Supports Bitcoin, Ethereum, Bitcoin Cash, Ripple, Litecoin, and Dogecoin as well
 
 ## How does it work?
 
-It's a node.js bot able to run on any service (currently AWS).
+It's a node.js bot able to run on any service (currently on a Raspberry Pi).
 
 It scans all messages for $SYMBOLs and retrieves a ticker from Yahoo! finance, then posts a message to the channel.
 
 ## How can I run this?
 
- - Setup the DISCORD_TOKEN environment variable with your platform
+ - Setup the `DISCORD_TOKEN` environment variable with your platform
+ - Optionally set up a `LOG_FILE_PATH` (default `/tmp/discord-stock-bot/`) and a `LOG_FILE` (default `applog-{date}.log`)
  - `npm install`
  - `npm run build`
  - `npm run start`
